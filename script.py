@@ -1,20 +1,14 @@
 import mdl
-
-import sys
-
 from display import *
 from matrix import *
 from draw import *
-
-num_frames = 0
-basename = 0
 
 """======== first_pass( commands, symbols ) ==========
 
   Checks the commands array for any animation commands
   (frames, basename, vary)
-
-  Should set num_frames and basename if the frames
+  
+  Should set num_frames and basename if the frames 
   or basename commands are present
 
   If vary is found, but frames is not, the entire
@@ -27,32 +21,31 @@ basename = 0
   jdyrlandweaver
   ==================== """
 def first_pass( commands ):
-    global basename
-    global num_frames
 
-    has_vary = False
-
+    frameCheck = varyCheck = nameCheck = False
+    name = ''
+    num_frames = 1
+    
     for command in commands:
-        if command[0] == "vary":
-            has_vary = True
-        elif command[0] == "basename":
-            basename = command[1]
-        elif command[0] == "frames":
+        
+        if command[0] == 'frames':
             num_frames = command[1]
+            frameCheck = True
+        elif command[0] == 'vary':
+            varyCheck = True
+        elif command[0] == 'basename':
+            name = command[1]
+            nameCheck = True
 
-    if has_vary and (num_frames == 0):
-        print "ERROR: frames not set"
-        sys.exit()
+    if varyCheck and not frameCheck:
+        print 'Error: Vary command found without setting number of frames!'
+        exit()
 
-    if num_frames == 0:
-        num_frames = 1
-
-    if basename == 0:
-        print "WARNING: BASENAME NOT FOUND"
-        basename = "simple"
-        print "BASENAME SET TO: simple"
-
-
+    elif frameCheck and not nameCheck:
+        print 'Animation code present but basename was not set. Using "frame" as basename.'
+        name = 'frame'
+    
+    return (name, num_frames)
 
 """======== second_pass( commands ) ==========
 
@@ -66,43 +59,48 @@ def first_pass( commands ):
   key will be a knob name, and each value will be the knob's
   value for that frame.
 
-  Go through the command array, and when you find vary, go
+  Go through the command array, and when you find vary, go 
   from knobs[0] to knobs[frames-1] and add (or modify) the
   dictionary corresponding to the given knob with the
-  appropirate value.
+  appropirate value. 
   ===================="""
 def second_pass( commands, num_frames ):
-    knobs = [ {} for x in range(num_frames) ]
+    frames = [ {} for i in range(num_frames) ]
 
     for command in commands:
-        if command[0] == "vary":
-            if (int(command[2]) >= num_frames) or (int(command[3]) >= num_frames):
-                print "ERROR: frames for " + command[1] + " out of bounds"
-                sys.exit()
+        if command[0] == 'vary':
+            knob_name = command[1]
+            start_frame = command[2]
+            end_frame = command[3]
+            start_value = float(command[4])
+            end_value = float(command[5])
+            value = 0
+            
+            if ((start_frame < 0) or
+                (end_frame >= num_frames) or
+                (end_frame <= start_frame)):
+                print 'Invalid vary command for knob: ' + knob_name
+                exit()
 
-            else:
-                a = int(command[2])
-                b = int(command[3])
+            delta = (end_value - start_value) / (end_frame - start_frame)
 
-                if a > b:
-                    c = b
-                    b = a
-                    a = c
-
-                init = float(command[4])
-                step = (float(command[5]) - init)/(b - a)
-
-                for i in range(a, b + 1):
-                    knobs[i][command[1]] = init
-                    init += step
-            #print knobs
-    return knobs
+            for f in range(num_frames):            
+                if f == start_frame:
+                    value = start_value
+                    frames[f][knob_name] = value
+                elif f >= start_frame and f <= end_frame:
+                    value = start_value + delta * (f - start_frame)
+                    frames[f][knob_name] = value
+                #print 'knob: ' + knob_name + '\tvalue: ' + str(frames[f][knob_name])
+    return frames
 
 def run(filename):
     """
     This function runs an mdl script
     """
     color = [255, 255, 255]
+    tmp = new_matrix()
+    ident( tmp )
 
     p = mdl.parseFile(filename)
 
@@ -112,76 +110,79 @@ def run(filename):
         print "Parsing failed."
         return
 
-    first_pass( commands )
-    knobs = second_pass( commands, num_frames )
-
-    tmp = new_matrix()
-    ident( tmp )
-    stack = [ [x[:] for x in tmp] ]
-    screen = new_screen()
-    tmp = []
+    (name, num_frames) = first_pass(commands)
+    frames = second_pass(commands, num_frames)
+    #print frames
     step = 0.1
 
-    for frame in range(num_frames):
-        knob = knobs[frame]
-        #print knob
+    #print symbols
+
+    for f in range(num_frames):
+
+        tmp = new_matrix()
+        ident(tmp)
+        stack = [ [x[:] for x in tmp] ]
+        screen = new_screen()
+        zb = new_zbuffer()
+        tmp = []
+
+        #Set symbol values for multiple frames
+        if num_frames > 1:
+            frame = frames[f]
+            for knob in frame:
+                symbols[knob][1] = frame[knob]
+                #print '\tkob: ' + knob + '\tvalue: ' + str(frame[knob])
+                
         for command in commands:
             #print command
             c = command[0]
             args = command[1:]
+            knob_value = 1
 
-            if c == 'box':
+            if c == 'set':
+                symbols[args[0]][1] = args[1]
+            elif c == 'set_knobs':
+                for knob in symbols:
+                    if symbols[knob][0] == 'knob':
+                        symbols[knob][1] = args[0]
+            elif c == 'box':
                 add_box(tmp,
                         args[0], args[1], args[2],
                         args[3], args[4], args[5])
                 matrix_mult( stack[-1], tmp )
-                draw_polygons(tmp, screen, color)
+                draw_polygons(tmp, screen, zb, color)
                 tmp = []
             elif c == 'sphere':
                 add_sphere(tmp,
                            args[0], args[1], args[2], args[3], step)
                 matrix_mult( stack[-1], tmp )
-                draw_polygons(tmp, screen, color)
+                draw_polygons(tmp, screen, zb, color)
                 tmp = []
             elif c == 'torus':
                 add_torus(tmp,
                           args[0], args[1], args[2], args[3], args[4], step)
                 matrix_mult( stack[-1], tmp )
-                draw_polygons(tmp, screen, color)
+                draw_polygons(tmp, screen, zb, color)
                 tmp = []
-
-            elif c == 'set':
-                if args[0] in knob:
-                    knob[args[0]] = float(args[1])
-
-            elif c == 'set_knobs':
-                for k in knob:
-                    knob[k] = float(args[0])
-
-            #transformations
             elif c == 'move':
-                if args[-1] in knob:
-                    args = [ i * knob[args[-1]] for i in args[:-1] ]
-
-                tmp = make_translate(args[0], args[1], args[2])
+                if command[-1]:
+                    knob_value = symbols[command[-1]][1]
+                tmp = make_translate(args[0] * knob_value, args[1] * knob_value, args[2] * knob_value)
                 matrix_mult(stack[-1], tmp)
                 stack[-1] = [x[:] for x in tmp]
                 tmp = []
-
             elif c == 'scale':
-                if args[-1] in knob:
-                    args = [ i * knob[args[-1]] for i in args[:-1] ]
-
-                tmp = make_scale(args[0], args[1], args[2])
+                if command[-1]:
+                    knob_value = symbols[command[-1]][1]                
+                tmp = make_scale(args[0] * knob_value, args[1] * knob_value, args[2] * knob_value)
                 matrix_mult(stack[-1], tmp)
                 stack[-1] = [x[:] for x in tmp]
                 tmp = []
             elif c == 'rotate':
-                theta = args[1] * (math.pi/180)
-
-                if args[-1] in knob:
-                    theta *= knob[args[-1]]
-
+                if command[-1]:
+                    knob_value = symbols[command[-1]][1]
+                    
+                theta = args[1] * (math.pi/180) * knob_value
                 if args[0] == 'x':
                     tmp = make_rotX(theta)
                 elif args[0] == 'y':
@@ -191,7 +192,6 @@ def run(filename):
                 matrix_mult( stack[-1], tmp )
                 stack[-1] = [ x[:] for x in tmp]
                 tmp = []
-
             elif c == 'push':
                 stack.append([x[:] for x in stack[-1]] )
             elif c == 'pop':
@@ -200,17 +200,12 @@ def run(filename):
                 display(screen)
             elif c == 'save':
                 save_extension(screen, args[0])
-
+        
         if num_frames > 1:
-            save_extension(screen, "anim/" + basename + ("%03d" % frame) + ".png")
-            print "Frame saved: anim/" + basename + ("%03d" % frame) + ".png"
-
-        #resetting for next loop
-        tmp = new_matrix()
-        ident( tmp )
-        stack = [ [x[:] for x in tmp] ]
-        screen = new_screen()
-        tmp = []
+            fname = 'anim/%s%03d.png' % (name, f)
+            print 'Saving frame: ' + fname
+            save_extension( screen, fname )
 
     if num_frames > 1:
-        make_animation( basename )
+        make_animation(name)
+    
