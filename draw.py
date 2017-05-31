@@ -352,10 +352,12 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
             loop_start = y1
             loop_end = y
 
-    if abs(y1 - y) != 0:
-        delta_z = float(z1 - z)/abs(y1 - y)
+    if distance != 0:
+        delta_z = float(z1 - z)/distance
     elif (x1 - x) != 0:
         delta_z = float(z1 - z)/(x1 - x)
+    elif abs(y1 - y) != 0:
+        delta_z = float(z1 - z)/abs(y1 - y)
     else:
         delta_z = 0
 
