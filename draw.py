@@ -352,15 +352,7 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
             loop_start = y1
             loop_end = y
 
-    if distance != 0:
-        delta_z = float(z1 - z)/distance
-    elif (x1 - x) != 0:
-        delta_z = float(z1 - z)/(x1 - x)
-    elif abs(y1 - y) != 0:
-        delta_z = float(z1 - z)/abs(y1 - y)
-    else:
-        delta_z = 0
-
+    delta_z = float(z1 - z)/distance if distance != 0 else 0
     while ( loop_start < loop_end ):
         plot( screen, zbuffer, color, x, y, z )
         if ( (wide and ((A > 0 and d > 0) or (A < 0 and d < 0))) or
