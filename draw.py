@@ -24,28 +24,27 @@ def scanline_convert(polygons, i, screen, zbuffer):
 
     x_0 = x_1 = int(Bpt[0])
     z_0 = z_1 = Bpt[2]
-    if (y_1 - y_0) != 0:
-        deltaX_0 = float(int(Tpt[0]) - x_0)/(y_1 - y_0)
-        deltaZ_0 = float(Tpt[2] - Bpt[2])/(y_1 - y_0)
-    if (int(Mpt[1]) - y_0) != 0:
-        deltaX_1 = float(int(Mpt[0]) - x_0)/(int(Mpt[1]) - y_0)
-        deltaZ_1 = float(Mpt[2] - Bpt[2])/(int(Mpt[1]) - y_0)
+
+    x0_coords = scanline_helper(x_0, y_0, z_0, int(Tpt[0]), y_1, Tpt[2])[::-1] if (x_0 > int(Tpt[0])) else scanline_helper(x_0, y_0, z_0, int(Tpt[0]), y_1, Tpt[2])
+    x1_coords = scanline_helper(x_0, y_0, z_0, int(Mpt[0]), int(Mpt[1]), Mpt[2])[::-1] if (x_0 > int(Mpt[0])) else scanline_helper(x_0, y_0, z_0, int(Mpt[0]), int(Mpt[1]), Mpt[2])
+    i_0 = i_1 = 0
 
     while y_0 < y_1:
-        if int(y_0) == int(Mpt[1]):
-            if (y_1 - int(Mpt[1])) != 0:
-                deltaX_1 = float(int(Tpt[0]) - int(Mpt[0]))/(y_1 - int(Mpt[1]))
-                deltaZ_1 = float(Tpt[2] - Mpt[2])/(y_1 - int(Mpt[1]))
+        if y_0 == int(Mpt[1]):
             x_1 = int(Mpt[0])
             z_1 = Mpt[2]
+            x1_coords = scanline_helper(x_1, y_0, z_1, int(Tpt[0]), y_1, Tpt[2])[::-1] if (x_1 > int(Tpt[0])) else scanline_helper(x_1, y_0, z_1, int(Tpt[0]), y_1, Tpt[2])
+            i_1 = 0
 
-        draw_line( int(round(x_0)), int(y_0), z_0, int(round(x_1)), int(y_0), z_1, screen, zbuffer, color )
-        x_0 += deltaX_0
-        x_1 += deltaX_1
-        z_0 += deltaZ_0
-        z_1 += deltaZ_1
+        draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color )
+
         y_0 += 1
-
+        i_0 += 1
+        i_1 += 1
+        x_0 = x0_coords[i_0][0]
+        z_0 = x0_coords[i_0][1]
+        x_1 = x1_coords[i_1][0]
+        z_1 = x1_coords[i_1][1]
 
 def add_polygon( polygons, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point(polygons, x0, y0, z0);
@@ -290,6 +289,86 @@ def add_edge( matrix, x0, y0, z0, x1, y1, z1 ):
 def add_point( matrix, x, y, z=0 ):
     matrix.append( [x, y, z, 1] )
 
+def scanline_helper(x0, y0, z0, x1, y1, z1):
+    #swap points if going right -> left
+    if x0 > x1:
+        xt = x0
+        yt = y0
+        zt = z0
+        x0 = x1
+        y0 = y1
+        z0 = z1
+        x1 = xt
+        y1 = yt
+        z1 = zt
+
+    x = x0
+    y = y0
+    z = z0
+    A = 2 * (y1 - y0)
+    B = -2 * (x1 - x0)
+    wide = False
+    tall = False
+
+    if ( abs(x1-x0) >= abs(y1 - y0) ): #octants 1/8
+        wide = True
+        loop_start = x
+        loop_end = x1
+        dx_east = dx_northeast = 1
+        dy_east = 0
+        d_east = A
+        distance = x1 - x
+        if ( A > 0 ): #octant 1
+            d = A + B/2
+            dy_northeast = 1
+            d_northeast = A + B
+        else: #octant 8
+            d = A - B/2
+            dy_northeast = -1
+            d_northeast = A - B
+
+    else: #octants 2/7
+        tall = True
+        dx_east = 0
+        dx_northeast = 1
+        distance = abs(y1 - y)
+        if ( A > 0 ): #octant 2
+            d = A/2 + B
+            dy_east = dy_northeast = 1
+            d_northeast = A + B
+            d_east = B
+            loop_start = y
+            loop_end = y1
+        else: #octant 7
+            d = A/2 - B
+            dy_east = dy_northeast = -1
+            d_northeast = A - B
+            d_east = -1 * B
+            loop_start = y1
+            loop_end = y
+
+    delta_z = float(z1 - z)/distance if distance != 0 else 0
+    old_y = y
+    l = [ [x, z] ]
+    while ( loop_start < loop_end ):
+        if y != old_y:
+            l.append([x, z])
+            old_y = y
+        if ( (wide and ((A > 0 and d > 0) or (A < 0 and d < 0))) or
+             (tall and ((A > 0 and d < 0) or (A < 0 and d > 0 )))):
+            x+= dx_northeast
+            y+= dy_northeast
+            d+= d_northeast
+        else:
+            x+= dx_east
+            y+= dy_east
+            d+= d_east
+        z += delta_z
+        loop_start+= 1
+
+    if y != old_y:
+        l.append([x, z])
+    return l
 
 
 
