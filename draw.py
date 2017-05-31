@@ -23,20 +23,27 @@ def scanline_convert(polygons, i, screen, zbuffer):
     y_1 = int(Tpt[1])
 
     x_0 = x_1 = int(Bpt[0])
+    z_0 = z_1 = Bpt[2]
     if (y_1 - y_0) != 0:
         deltaX_0 = float(int(Tpt[0]) - x_0)/(y_1 - y_0)
+        deltaZ_0 = float(Tpt[2] - Bpt[2])/(y_1 - y_0)
     if (int(Mpt[1]) - y_0) != 0:
         deltaX_1 = float(int(Mpt[0]) - x_0)/(int(Mpt[1]) - y_0)
+        deltaZ_1 = float(Mpt[2] - Bpt[2])/(int(Mpt[1]) - y_0)
 
     while y_0 < y_1:
         if int(y_0) == int(Mpt[1]):
             if (y_1 - int(Mpt[1])) != 0:
                 deltaX_1 = float(int(Tpt[0]) - int(Mpt[0]))/(y_1 - int(Mpt[1]))
+                deltaZ_1 = float(Tpt[2] - Mpt[2])/(y_1 - int(Mpt[1]))
             x_1 = int(Mpt[0])
+            z_1 = Mpt[2]
 
-        draw_line( int(round(x_0)), int(y_0), int(round(x_1)), int(y_0), screen, color )
+        draw_line( int(round(x_0)), int(y_0), z_0, int(round(x_1)), int(y_0), z_1, screen, zbuffer, color )
         x_0 += deltaX_0
         x_1 += deltaX_1
+        z_0 += deltaZ_0
+        z_1 += deltaZ_1
         y_0 += 1
 
 
@@ -345,7 +352,13 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
             loop_start = y1
             loop_end = y
 
-    delta_z = float(z1 - z)/distance
+    if abs(y1 - y) != 0:
+        delta_z = float(z1 - z)/abs(y1 - y)
+    elif (x1 - x) != 0:
+        delta_z = float(z1 - z)/(x1 - x)
+    else:
+        delta_z = 0
+
     while ( loop_start < loop_end ):
         plot( screen, zbuffer, color, x, y, z )
         if ( (wide and ((A > 0 and d > 0) or (A < 0 and d < 0))) or
