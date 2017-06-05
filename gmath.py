@@ -1,5 +1,7 @@
 import math
 
+e = 1
+
 def calculate_normal(polygons, i):
 
     A = [0, 0, 0]
@@ -36,3 +38,13 @@ def calculate_dot_product(a, b):
     b = to_unit_vector(b)
 
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+def i_ambient(A, K_a):
+    return A * K_a
+
+def i_diffuse(L_c, K_d, N, L):
+    p = calculate_dot_product(N, L)
+    return L_c * K_d * p
+
+def i_specular():
+    pass
