@@ -5,9 +5,7 @@ from gmath import *
 
 import random
 
-def scanline_convert(polygons, i, screen, zbuffer):
-    color = [ random.randrange(256), random.randrange(256), random.randrange(256) ]
-
+def scanline_convert(polygons, i, screen, zbuffer, color):
     y_list = [ polygons[i][1], polygons[i+1][1], polygons[i+2][1] ]
 
     b = y_list.index(min(y_list))
@@ -62,7 +60,8 @@ def draw_polygons( matrix, screen, zbuffer, color ):
         normal = calculate_normal(matrix, point)[:]
         #print normal
         if normal[2] > 0:
-            scanline_convert(matrix, point, screen, zbuffer)
+            color = [ random.randrange(256), random.randrange(256), random.randrange(256) ]
+            scanline_convert(matrix, point, screen, zbuffer, color)
             draw_line( int(matrix[point][0]),
                        int(matrix[point][1]),
                        matrix[point][2],
