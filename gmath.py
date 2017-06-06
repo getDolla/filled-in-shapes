@@ -1,6 +1,7 @@
 import math
 
 e = 1
+V = [0, 0, 1]
 
 def calculate_normal(polygons, i):
 
@@ -25,6 +26,12 @@ def calculate_normal(polygons, i):
 def calculate_mag(vector):
     return math.sqrt( vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2] )
 
+def scalar_mult(vector, scalar):
+    return [ scalar * i for i in vector ]
+
+def vector_subtraction(a, b)
+    return [ (a[0] - b[0]), (a[1] - b[1]), (a[2] - b[2]) ]
+
 def to_unit_vector(vector):
     v = [0, 0, 0]
     mag = calculate_mag(vector)
@@ -46,5 +53,13 @@ def i_diffuse(L_c, K_d, N, L):
     p = calculate_dot_product(N, L)
     return L_c * K_d * p
 
-def i_specular():
-    pass
+def i_specular(L_c, K_s, N, L):
+    N_L = calculate_dot_product(N, L)
+    p = scalar_mult(N, 2)
+    p = scalar_mult(p, N_L)
+    d = vector_subtraction(p, L)
+    p = calculate_dot_product(d, V)
+    
+    return L_c * K_d * (p ** e)
+    
+    
