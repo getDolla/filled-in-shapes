@@ -45,7 +45,8 @@ def calculate_dot_product(a, b):
     a = to_unit_vector(a)
     b = to_unit_vector(b)
 
-    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+    p = a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+    return p if p >= 0 else 0
 
 def i_ambient(A, K_a):
     return A * K_a
