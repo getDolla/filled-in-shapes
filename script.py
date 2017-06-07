@@ -66,6 +66,9 @@ def first_pass( commands ):
   ===================="""
 def second_pass( commands, num_frames ):
     frames = [ {} for i in range(num_frames) ]
+    constants = {}
+    light_source = {}
+    ambient = []
 
     for command in commands:
         if command[0] == 'vary':
@@ -92,7 +95,16 @@ def second_pass( commands, num_frames ):
                     value = start_value + delta * (f - start_frame)
                     frames[f][knob_name] = value
                 #print 'knob: ' + knob_name + '\tvalue: ' + str(frames[f][knob_name])
-    return frames
+        elif command[0] == 'constants':
+            constants[command[1]] = [ float(i) for i in command[2:] ]
+
+        elif command[0] == 'light':
+            light_source[command[1]] = [ float(i) for i in command[2:] ]
+
+        elif command[0] == 'ambient':
+            ambient = [ int(i) for i in command[1:] ]
+            
+    return frames, constants, light_source, ambient
 
 def run(filename):
     """
@@ -111,7 +123,7 @@ def run(filename):
         return
 
     (name, num_frames) = first_pass(commands)
-    frames = second_pass(commands, num_frames)
+    (frames, constants, light_source, ambient) = second_pass(commands, num_frames)
     #print frames
     step = 0.1
 

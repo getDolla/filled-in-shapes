@@ -29,12 +29,13 @@ def calculate_mag(vector):
 def scalar_mult(vector, scalar):
     return [ scalar * i for i in vector ]
 
-def vector_subtraction(a, b)
+def vector_subtraction(a, b):
     return [ (a[0] - b[0]), (a[1] - b[1]), (a[2] - b[2]) ]
 
 def to_unit_vector(vector):
     v = [0, 0, 0]
     mag = calculate_mag(vector)
+    
     v[0] = (vector[0])/mag
     v[1] = (vector[1])/mag
     v[2] = (vector[2])/mag
@@ -61,5 +62,6 @@ def i_specular(L_c, K_s, N, L):
     p = calculate_dot_product(d, V)
     
     return L_c * K_d * (p ** e)
-    
-    
+
+def intensity(i_ambient, i_diffuse, i_specular):
+    return i_ambient + i_diffuse + i_specular
