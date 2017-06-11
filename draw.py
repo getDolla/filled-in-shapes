@@ -63,6 +63,7 @@ def draw_polygons( matrix, screen, zbuffer, color, constants = [], light_sources
             if shading_type == "flat":
                 color = calc_total_light(normal, constants, light_sources)
 
+            # print color
             scanline_convert(matrix, point, screen, zbuffer, color)
             draw_line( int(matrix[point][0]),
                        int(matrix[point][1]),

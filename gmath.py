@@ -1,6 +1,6 @@
 import math
 
-e = 1
+e = 6
 V = [0, 0, 1]
 
 def calculate_normal(polygons, i):
@@ -27,8 +27,7 @@ def calculate_mag(vector):
     return math.sqrt( vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2] )
 
 def scalar_mult(vector, scalar):
-    vtor = to_unit_vector(vector)
-    return [ scalar * i for i in vtor ]
+    return [ scalar * i for i in vector ]
 
 def vector_subtraction(a, b):
     return [ (a[0] - b[0]), (a[1] - b[1]), (a[2] - b[2]) ]
