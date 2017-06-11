@@ -130,20 +130,20 @@ def list_vertex_normals(matrix):
     point = 0
     while point < len(matrix) - 2:
         normal = calculate_normal(matrix, point)[:]
-        if (int(matrix[point][0]), int(matrix[point][1]), matrix[point][0]) in v_n:
-            v_n[(int(matrix[point][0]), int(matrix[point][1]), matrix[point][0])].append(normal)
+        if (int(matrix[point][0]), int(matrix[point][1]), matrix[point][2]) in v_n:
+            v_n[(int(matrix[point][0]), int(matrix[point][1]), matrix[point][2])].append(normal)
         else:
-            v_n[(int(matrix[point][0]), int(matrix[point][1]), matrix[point][0])] = [ normal ]
+            v_n[(int(matrix[point][0]), int(matrix[point][1]), matrix[point][2])] = [ normal ]
 
-        if (int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][0]) in v_n:
-            v_n[(int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][0])].append(normal)
+        if (int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][2]) in v_n:
+            v_n[(int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][2])].append(normal)
         else:
-            v_n[(int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][0])] = [ normal ]
+            v_n[(int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][2])] = [ normal ]
 
-        if (int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][0]) in v_n:
-            v_n[(int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][0])].append(normal)
+        if (int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][2]) in v_n:
+            v_n[(int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][2])].append(normal)
         else:
-            v_n[(int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][0])] = [ normal ]
+            v_n[(int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][2])] = [ normal ]
 
         point+= 3
 

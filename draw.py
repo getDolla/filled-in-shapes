@@ -5,7 +5,7 @@ from gmath import *
 
 import random
 
-def scanline_convert(polygons, i, screen, zbuffer, color, shading_type = ""):
+def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensities):
     y_list = [ polygons[i][1], polygons[i+1][1], polygons[i+2][1] ]
 
     b = y_list.index(min(y_list))
@@ -24,12 +24,26 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type = ""):
     x1_coords = scanline_helper(x_0, y_0, z_0, int(Mpt[0]), int(Mpt[1]), Mpt[2])[::-1] if (x_0 > int(Mpt[0])) else scanline_helper(x_0, y_0, z_0, int(Mpt[0]), int(Mpt[1]), Mpt[2])
     i_0 = i_1 = 0
 
+    if shading_type == "goroud":
+        I_1 = intensities[t]
+        I_2 = intensities[b]
+        I_3 = intensities[m]
+
     while y_0 < y_1:
         if y_0 == int(Mpt[1]):
             x_1 = int(Mpt[0])
             z_1 = Mpt[2]
             x1_coords = scanline_helper(x_1, y_0, z_1, int(Tpt[0]), y_1, Tpt[2])[::-1] if (x_1 > int(Tpt[0])) else scanline_helper(x_1, y_0, z_1, int(Tpt[0]), y_1, Tpt[2])
             i_1 = 0
+
+        if shading_type == "goroud":
+            (y_3, y_2) = (int(Mpt[1]), int(Bpt[1])) if y_0 < int(Mpt[1]) else (y_1, int(Mpt[1]))
+            (x_b, x_a) = (x_1, x_0) if x_1 >= x_0 else (x_0, x_1)
+            I_a = I_b = color[:]
+
+            for j in range(len(color)):
+                I_a[j] = (float(y_0 - int(Bpt[1]))/(int(Bpt[1]) - y_1)) * I_1[j] + (float(y_1 - y_0)/(int(Bpt[1]) - y_1)) * I_2[j]
+                I_b[j] = (float(y_0 - y_2)/(y_3 - y_2)) * I_3[j] + (float(y_3 - y_0)/(y_3 - y_2)) * I_2[j]
 
         draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color )
 
@@ -53,6 +67,10 @@ def draw_polygons( matrix, screen, zbuffer, color, constants = [], light_sources
         print 'Need at least 3 points to draw'
         return
 
+    if shading_type == "goroud":
+        v_n = list_vertex_normals(matrix)
+
+    intensities = {}
     point = 0
     while point < len(matrix) - 2:
 
@@ -62,11 +80,13 @@ def draw_polygons( matrix, screen, zbuffer, color, constants = [], light_sources
             if shading_type == "flat":
                 color = calc_total_light(normal, constants, light_sources)
 
-            elif shading_type == "goroud" or shading_type == "phong":
-                v_n = list_vertex_normals(matrix)
+            elif shading_type == "goroud":
+                intensities = [ calc_total_light(v_n[(int(matrix[point][0]), int(matrix[point][1]), matrix[point][2])], constants, light_sources),
+                                calc_total_light(v_n[(int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][2])], constants, light_sources),
+                                calc_total_light(v_n[(int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][2])], constants, light_sources) ]
             # print color
             # color = [ random.randrange(256), random.randrange(256), random.randrange(256) ]
-            scanline_convert(matrix, point, screen, zbuffer, color)
+            scanline_convert(matrix, point, screen, zbuffer, color, shading_type, intensities )
             # draw_line( int(matrix[point][0]),
             #            int(matrix[point][1]),
             #            matrix[point][2],
