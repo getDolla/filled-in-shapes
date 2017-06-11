@@ -163,8 +163,6 @@ def run(filename):
                     draw_polygons(tmp, screen, zb, color)
                 tmp = []
             elif c == 'sphere':
-                # if command[-1]:
-
                 add_sphere(tmp,
                            args[0], args[1], args[2], args[3], step)
                 matrix_mult( stack[-1], tmp )
@@ -174,8 +172,6 @@ def run(filename):
                     draw_polygons(tmp, screen, zb, color)
                 tmp = []
             elif c == 'torus':
-                # if command[-1]:
-
                 add_torus(tmp,
                           args[0], args[1], args[2], args[3], args[4], step)
                 matrix_mult( stack[-1], tmp )
