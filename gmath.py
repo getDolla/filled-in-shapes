@@ -27,7 +27,8 @@ def calculate_mag(vector):
     return math.sqrt( vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2] )
 
 def scalar_mult(vector, scalar):
-    return [ scalar * i for i in vector ]
+    vtor = to_unit_vector(vector)
+    return [ scalar * i for i in vtor ]
 
 def vector_subtraction(a, b):
     return [ (a[0] - b[0]), (a[1] - b[1]), (a[2] - b[2]) ]
@@ -104,5 +105,5 @@ def calc_total_light(N, constants, light_sources):
 
     colour[0] = colour[0] if colour[0] <= 255 else 255
     colour[1] = colour[1] if colour[1] <= 255 else 255
-    colour[2] = colour[2] if colour[2] <= 255 else 255 
+    colour[2] = colour[2] if colour[2] <= 255 else 255
     return colour
