@@ -107,5 +107,47 @@ def calc_total_light(N, constants, light_sources):
     colour[2] = colour[2] if colour[2] <= 255 else 255
     return colour
 
-def list_vertex_normals(points):
-    pass
+def calc_avg_normal(normals):
+    x_sum = 0.0
+    y_sum = 0.0
+    z_sum = 0.0
+
+    for i in normals:
+        x_sum += i[0]
+        y_sum += i[1]
+        z_sum += i[2]
+
+    length = len(normals)
+    return [ x_sum/length, y_sum/length, z_sum/length ]
+
+def list_vertex_normals(matrix):
+    v_n = {}
+
+    if len(matrix) < 2:
+        print 'Need at least 3 points to draw'
+        return
+
+    point = 0
+    while point < len(matrix) - 2:
+        normal = calculate_normal(matrix, point)[:]
+        if (int(matrix[point][0]), int(matrix[point][1]), matrix[point][0]) in v_n:
+            v_n[(int(matrix[point][0]), int(matrix[point][1]), matrix[point][0])].append(normal)
+        else:
+            v_n[(int(matrix[point][0]), int(matrix[point][1]), matrix[point][0])] = [ normal ]
+
+        if (int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][0]) in v_n:
+            v_n[(int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][0])].append(normal)
+        else:
+            v_n[(int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][0])] = [ normal ]
+
+        if (int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][0]) in v_n:
+            v_n[(int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][0])].append(normal)
+        else:
+            v_n[(int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][0])] = [ normal ]
+
+        point+= 3
+
+    for key in v_n:
+        v_n[key] = calc_avg_normal(v_n[key])
+
+    return v_n

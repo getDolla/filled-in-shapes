@@ -10,16 +10,13 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type = ""):
 
     b = y_list.index(min(y_list))
     Bpt = polygons[i+b]
-
     t = y_list.index(max(y_list))
     Tpt = polygons[i+t]
-
     m = 3 - (t + b)
     Mpt = polygons[i+m]
 
     y_0 = int(Bpt[1])
     y_1 = int(Tpt[1])
-
     x_0 = x_1 = int(Bpt[0])
     z_0 = z_1 = Bpt[2]
 
@@ -66,7 +63,7 @@ def draw_polygons( matrix, screen, zbuffer, color, constants = [], light_sources
                 color = calc_total_light(normal, constants, light_sources)
 
             elif shading_type == "goroud" or shading_type == "phong":
-                list_vertex_normals(points)
+                v_n = list_vertex_normals(matrix)
             # print color
             # color = [ random.randrange(256), random.randrange(256), random.randrange(256) ]
             scanline_convert(matrix, point, screen, zbuffer, color)
