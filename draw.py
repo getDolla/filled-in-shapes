@@ -38,14 +38,16 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensit
 
         if shading_type == "goroud":
             (y_3, y_2) = (int(Mpt[1]), int(Bpt[1])) if y_0 < int(Mpt[1]) else (y_1, int(Mpt[1]))
-            (x_b, x_a) = (x_1, x_0) if x_1 >= x_0 else (x_0, x_1)
             I_a = I_b = color[:]
 
             for j in range(len(color)):
-                I_a[j] = (float(y_0 - int(Bpt[1]))/(int(Bpt[1]) - y_1)) * I_1[j] + (float(y_1 - y_0)/(int(Bpt[1]) - y_1)) * I_2[j]
+                I_a[j] = (float(y_0 - int(Bpt[1]))/(y_1 - int(Bpt[1]))) * I_1[j] + (float(y_1 - y_0)/(y_1 - int(Bpt[1]))) * I_2[j]
                 I_b[j] = (float(y_0 - y_2)/(y_3 - y_2)) * I_3[j] + (float(y_3 - y_0)/(y_3 - y_2)) * I_2[j]
 
-        draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color )
+            draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_a, I_b )
+
+        else:
+            draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color )
 
         y_0 += 1
         i_0 += 1
@@ -70,7 +72,7 @@ def draw_polygons( matrix, screen, zbuffer, color, constants = [], light_sources
     if shading_type == "goroud":
         v_n = list_vertex_normals(matrix)
 
-    intensities = {}
+    intensities = []
     point = 0
     while point < len(matrix) - 2:
 
@@ -396,7 +398,7 @@ def scanline_helper(x0, y0, z0, x1, y1, z1):
 
 
 
-def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
+def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color, I_a = [], I_b = [] ):
 
     #swap points if going right -> left
     if x0 > x1:
@@ -456,8 +458,15 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
             loop_end = y
 
     delta_z = float(z1 - z)/distance if distance != 0 else 0
+
+    if len(I_a) > 0 and len(I_b) > 0 and (x1 - x0) > 0:
+        for i in range(len(color)):
+            I = int(round((float(x - x0)/(x1 - x0)) * I_b[i] + (float(x1 - x)/(x1 - x0)) * I_a[i]))
+            color[i] = I if I <= 255 else 255
+
     while ( loop_start < loop_end ):
         plot( screen, zbuffer, color, x, y, z )
+
         if ( (wide and ((A > 0 and d > 0) or (A < 0 and d < 0))) or
              (tall and ((A > 0 and d < 0) or (A < 0 and d > 0 )))):
             x+= dx_northeast
@@ -467,6 +476,13 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
             x+= dx_east
             y+= dy_east
             d+= d_east
+
+        if len(I_a) > 0 and len(I_b) > 0:
+            for i in range(len(color)):
+                I = int(round((float(x - x0)/(x1 - x0)) * I_b[i] + (float(x1 - x)/(x1 - x0)) * I_a[i]))
+                color[i] = I if I <= 255 else 255
+
+        # print color
         z += delta_z
         loop_start+= 1
 
