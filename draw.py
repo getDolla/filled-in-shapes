@@ -29,23 +29,27 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensit
         I_2 = intensities[b]
         I_3 = intensities[m]
 
+        I_a = intensities[b][:]
+        I_b = intensities[b][:]
+        (y_3, y_2) = (int(Mpt[1]), int(Bpt[1]))
+
     while y_0 < y_1:
         if y_0 == int(Mpt[1]):
             x_1 = int(Mpt[0])
             z_1 = Mpt[2]
             x1_coords = scanline_helper(x_1, y_0, z_1, int(Tpt[0]), y_1, Tpt[2])[::-1] if (x_1 > int(Tpt[0])) else scanline_helper(x_1, y_0, z_1, int(Tpt[0]), y_1, Tpt[2])
             i_1 = 0
+            if shading_type == "goroud" and int(Mpt[1]) != y_1:
+                 I_b = intensities[m][:]
+                 I_2 = intensities[m]
+                 I_3 = intensities[t]
+                 (y_3, y_2) = (y_1, int(Mpt[1]))
 
         if shading_type == "goroud":
-            (y_3, y_2) = (int(Mpt[1]), int(Bpt[1])) if y_0 < int(Mpt[1]) else (y_1, int(Mpt[1]))
-            I_a = I_b = color[:]
-
-            for j in range(len(color)):
-                I_a[j] = (float(y_0 - int(Bpt[1]))/(y_1 - int(Bpt[1]))) * I_1[j] + (float(y_1 - y_0)/(y_1 - int(Bpt[1]))) * I_2[j]
-                I_b[j] = (float(y_0 - y_2)/(y_3 - y_2)) * I_3[j] + (float(y_3 - y_0)/(y_3 - y_2)) * I_2[j]
-
-            draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_a, I_b )
-
+            if int(Mpt[0]) < int(Tpt[0]):
+                draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_b, I_a )
+            else:
+                draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_a, I_b )
         else:
             draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color )
 
@@ -57,7 +61,18 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensit
         x_1 = x1_coords[i_1][0]
         z_1 = x1_coords[i_1][1]
 
-    draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color )
+        if shading_type == "goroud" and (y_0 < y_1):
+            for j in range(len(color)):
+                I_a[j] = int(round((float(y_0 - int(Bpt[1]))/(y_1 - int(Bpt[1]))) * I_1[j] + (float(y_1 - y_0)/(y_1 - int(Bpt[1]))) * intensities[b][j]))
+                I_b[j] = int(round((float(y_0 - y_2)/(y_3 - y_2)) * I_3[j] + (float(y_3 - y_0)/(y_3 - y_2)) * I_2[j]))
+
+    if shading_type == "goroud":
+        if int(Mpt[0]) < int(Tpt[0]):
+            draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_b, I_1 )
+        else:
+            draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_1, I_b )
+    else:
+        draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color )
 
 def add_polygon( polygons, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point(polygons, x0, y0, z0);
@@ -110,7 +125,7 @@ def draw_polygons( matrix, screen, zbuffer, color, constants = [], light_sources
             #            int(matrix[point+2][1]),
             #            matrix[point+2][2],
             #            screen, zbuffer, color)
-        point+= 3
+        point += 3
 
 
 def add_box( polygons, x, y, z, width, height, depth ):
@@ -459,11 +474,6 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color, I_a = [], I_b = [
 
     delta_z = float(z1 - z)/distance if distance != 0 else 0
 
-    if len(I_a) > 0 and len(I_b) > 0 and (x1 - x0) > 0:
-        for i in range(len(color)):
-            I = int(round((float(x - x0)/(x1 - x0)) * I_b[i] + (float(x1 - x)/(x1 - x0)) * I_a[i]))
-            color[i] = I if I <= 255 else 255
-
     while ( loop_start < loop_end ):
         plot( screen, zbuffer, color, x, y, z )
 
@@ -486,4 +496,4 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color, I_a = [], I_b = [
         z += delta_z
         loop_start+= 1
 
-    plot( screen, zbuffer, color, x1, y1, z1 )
+    plot( screen, zbuffer, I_b, x1, y1, z1 )

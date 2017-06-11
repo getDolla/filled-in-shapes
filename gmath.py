@@ -1,6 +1,6 @@
 import math
 
-e = 1
+e = 100
 V = [0, 0, 1]
 
 def calculate_normal(polygons, i):
@@ -57,8 +57,7 @@ def i_diffuse(L_c, K_d, N, L):
 
 def i_specular(L_c, K_s, N, L):
     N_L = calculate_dot_product(N, L)
-    p = scalar_mult(N, 2)
-    p = scalar_mult(p, N_L)
+    p = scalar_mult(scalar_mult(N, 2), N_L)
     d = vector_subtraction(p, L)
     p = calculate_dot_product(d, V)
 
@@ -123,10 +122,6 @@ def calc_avg_normal(normals):
 def list_vertex_normals(matrix):
     v_n = {}
 
-    if len(matrix) < 2:
-        print 'Need at least 3 points to draw'
-        return
-
     point = 0
     while point < len(matrix) - 2:
         normal = calculate_normal(matrix, point)[:]
@@ -145,7 +140,7 @@ def list_vertex_normals(matrix):
         else:
             v_n[(int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][2])] = [ normal ]
 
-        point+= 3
+        point += 3
 
     for key in v_n:
         v_n[key] = calc_avg_normal(v_n[key])
