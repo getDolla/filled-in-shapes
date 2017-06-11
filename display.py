@@ -9,7 +9,7 @@ RED = 0
 GREEN = 1
 BLUE = 2
 
-DEFAULT_COLOR = [255, 255, 255]
+DEFAULT_COLOR = [0, 0, 0]
 
 def new_screen( width = XRES, height = YRES ):
     screen = []
@@ -78,5 +78,3 @@ def make_animation( name ):
     f = fork()
     if f == 0:
         execlp('convert', 'convert', '-delay', '3', name_arg, name)
-    
-    
