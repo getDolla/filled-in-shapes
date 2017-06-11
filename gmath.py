@@ -1,6 +1,6 @@
 import math
 
-e = 6
+e = 1
 V = [0, 0, 1]
 
 def calculate_normal(polygons, i):
@@ -106,3 +106,6 @@ def calc_total_light(N, constants, light_sources):
     colour[1] = colour[1] if colour[1] <= 255 else 255
     colour[2] = colour[2] if colour[2] <= 255 else 255
     return colour
+
+def list_vertex_normals(points):
+    pass

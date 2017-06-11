@@ -5,7 +5,7 @@ from gmath import *
 
 import random
 
-def scanline_convert(polygons, i, screen, zbuffer, color):
+def scanline_convert(polygons, i, screen, zbuffer, color, shading_type = ""):
     y_list = [ polygons[i][1], polygons[i+1][1], polygons[i+2][1] ]
 
     b = y_list.index(min(y_list))
@@ -65,6 +65,8 @@ def draw_polygons( matrix, screen, zbuffer, color, constants = [], light_sources
             if shading_type == "flat":
                 color = calc_total_light(normal, constants, light_sources)
 
+            elif shading_type == "goroud" or shading_type == "phong":
+                list_vertex_normals(points)
             # print color
             # color = [ random.randrange(256), random.randrange(256), random.randrange(256) ]
             scanline_convert(matrix, point, screen, zbuffer, color)

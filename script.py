@@ -103,7 +103,6 @@ def run(filename):
     """
     This function runs an mdl script
     """
-    color = [255, 255, 255]
     tmp = new_matrix()
     ident( tmp )
 
@@ -144,6 +143,7 @@ def run(filename):
 
         for command in commands:
             #print command
+            color = [255, 255, 255]
             c = command[0]
             args = command[1:]
             knob_value = 1
