@@ -474,6 +474,9 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color, I_a = [], I_b = [
 
     delta_z = float(z1 - z)/distance if distance != 0 else 0
 
+    if len(I_a) > 0 and len(I_b) > 0:
+        color = I_a[:]
+
     while ( loop_start < loop_end ):
         plot( screen, zbuffer, color, x, y, z )
 
