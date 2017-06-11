@@ -122,7 +122,9 @@ def run(filename):
 
     # print symbols
     light_sources = [ symbols[i][1] for i in symbols if symbols[i][0] == "light" ]
-    shading_type = symbols['shading'][1]
+
+    if "shading" in symbols:
+        shading_type = symbols['shading'][1]
 
     for f in range(num_frames):
 

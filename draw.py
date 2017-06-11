@@ -44,6 +44,8 @@ def scanline_convert(polygons, i, screen, zbuffer, color):
         x_1 = x1_coords[i_1][0]
         z_1 = x1_coords[i_1][1]
 
+    draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color )
+
 def add_polygon( polygons, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point(polygons, x0, y0, z0);
     add_point(polygons, x1, y1, z1);
@@ -64,28 +66,29 @@ def draw_polygons( matrix, screen, zbuffer, color, constants = [], light_sources
                 color = calc_total_light(normal, constants, light_sources)
 
             # print color
+            # color = [ random.randrange(256), random.randrange(256), random.randrange(256) ]
             scanline_convert(matrix, point, screen, zbuffer, color)
-            draw_line( int(matrix[point][0]),
-                       int(matrix[point][1]),
-                       matrix[point][2],
-                       int(matrix[point+1][0]),
-                       int(matrix[point+1][1]),
-                       matrix[point+1][2],
-                       screen, zbuffer, color)
-            draw_line( int(matrix[point+2][0]),
-                       int(matrix[point+2][1]),
-                       matrix[point+2][2],
-                       int(matrix[point+1][0]),
-                       int(matrix[point+1][1]),
-                       matrix[point+1][2],
-                       screen, zbuffer, color)
-            draw_line( int(matrix[point][0]),
-                       int(matrix[point][1]),
-                       matrix[point][2],
-                       int(matrix[point+2][0]),
-                       int(matrix[point+2][1]),
-                       matrix[point+2][2],
-                       screen, zbuffer, color)
+            # draw_line( int(matrix[point][0]),
+            #            int(matrix[point][1]),
+            #            matrix[point][2],
+            #            int(matrix[point+1][0]),
+            #            int(matrix[point+1][1]),
+            #            matrix[point+1][2],
+            #            screen, zbuffer, color)
+            # draw_line( int(matrix[point+2][0]),
+            #            int(matrix[point+2][1]),
+            #            matrix[point+2][2],
+            #            int(matrix[point+1][0]),
+            #            int(matrix[point+1][1]),
+            #            matrix[point+1][2],
+            #            screen, zbuffer, color)
+            # draw_line( int(matrix[point][0]),
+            #            int(matrix[point][1]),
+            #            matrix[point][2],
+            #            int(matrix[point+2][0]),
+            #            int(matrix[point+2][1]),
+            #            matrix[point+2][2],
+            #            screen, zbuffer, color)
         point+= 3
 
 
