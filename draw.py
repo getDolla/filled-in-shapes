@@ -5,7 +5,7 @@ from gmath import *
 
 import random
 
-def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensities):
+def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensities, constants, light_sources):
     y_list = [ polygons[i][1], polygons[i+1][1], polygons[i+2][1] ]
 
     b = y_list.index(min(y_list))
@@ -23,10 +23,6 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensit
     x0_coords = scanline_helper(x_0, y_0, z_0, int(Tpt[0]), y_1, Tpt[2])[::-1] if (x_0 > int(Tpt[0])) else scanline_helper(x_0, y_0, z_0, int(Tpt[0]), y_1, Tpt[2])
     x1_coords = scanline_helper(x_0, y_0, z_0, int(Mpt[0]), int(Mpt[1]), Mpt[2])[::-1] if (x_0 > int(Mpt[0])) else scanline_helper(x_0, y_0, z_0, int(Mpt[0]), int(Mpt[1]), Mpt[2])
     i_0 = i_1 = 0
-    swap = True if (int(Mpt[0]) <= int(Tpt[0])) and (int(Mpt[0]) <= int(Bpt[0])) else False
-    if int(Mpt[0]) != x_0 and int(Tpt[0]) != x_0:
-        swap = True if (int(Mpt[0]) <= int(Tpt[0])) and (int(Mpt[0]) >= int(Bpt[0])) and (float(y_1-y_0)/(int(Tpt[0])-x_0) <= float(int(Mpt[1])-y_0)/(int(Mpt[0])-x_0)) else swap
-        swap = True if (int(Bpt[0]) >= int(Tpt[0])) and (int(Mpt[0]) <= int(Bpt[0])) and (float(y_1-y_0)/(x_0-int(Tpt[0])) >= float(int(Mpt[1])-y_0)/(x_0-int(Mpt[0]))) else swap
 
     if shading_type == "goroud":
         I_1 = intensities[t]
@@ -37,6 +33,29 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensit
         I_b = intensities[b][:]
         (y_3, y_2) = (int(Mpt[1]), int(Bpt[1]))
 
+        swap = True if (int(Mpt[0]) <= int(Tpt[0])) and (int(Mpt[0]) <= int(Bpt[0])) else False
+        if int(Mpt[0]) != x_0 and int(Tpt[0]) != x_0:
+            swap = True if (int(Mpt[0]) <= int(Tpt[0])) and (int(Mpt[0]) >= int(Bpt[0])) and (float(y_1-y_0)/(int(Tpt[0])-x_0) <= float(int(Mpt[1])-y_0)/(int(Mpt[0])-x_0)) else swap
+            swap = True if (int(Bpt[0]) >= int(Tpt[0])) and (int(Mpt[0]) <= int(Bpt[0])) and (float(y_1-y_0)/(x_0-int(Tpt[0])) >= float(int(Mpt[1])-y_0)/(x_0-int(Mpt[0]))) else swap
+
+    elif shading_type == "phong":
+        N_Bpt = intensities[b]
+        N_Mpt = intensities[m]
+        N_Tpt = intensities[t]
+
+        if y_1 - y_0 != 0:
+            d_N_0 = [ float(N_Tpt[0] - N_Bpt[0])/(y_1 - y_0), float(N_Tpt[1] - N_Bpt[1])/(y_1 - y_0), float(N_Tpt[2] - N_Bpt[2])/(y_1 - y_0) ]
+            if int(Mpt[1])- y_0 != 0:
+                d_N_1 = [ float(N_Mpt[0] - N_Bpt[0])/(int(Mpt[1])-y_0), float(N_Mpt[1] - N_Bpt[1])/(int(Mpt[1])-y_0), float(N_Mpt[2] - N_Bpt[2])/(int(Mpt[1])-y_0) ]
+
+        N_a = N_Bpt[:]
+        N_b = N_Bpt[:]
+
+        swap = True if (int(Mpt[0]) <= int(Tpt[0])) and (int(Mpt[0]) <= int(Bpt[0])) else False
+        if int(Mpt[0]) != x_0 and int(Tpt[0]) != x_0:
+            swap = True if (int(Mpt[0]) <= int(Tpt[0])) and (int(Mpt[0]) >= int(Bpt[0])) and (float(y_1-y_0)/(int(Tpt[0])-x_0) <= float(int(Mpt[1])-y_0)/(int(Mpt[0])-x_0)) else swap
+            swap = True if (int(Bpt[0]) >= int(Tpt[0])) and (int(Mpt[0]) <= int(Bpt[0])) and (float(y_1-y_0)/(x_0-int(Tpt[0])) >= float(int(Mpt[1])-y_0)/(x_0-int(Mpt[0]))) else swap
+
     while y_0 < y_1:
         if y_0 == int(Mpt[1]):
             x_1 = int(Mpt[0])
@@ -45,16 +64,28 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensit
             i_1 = 0
 
             if shading_type == "goroud" and int(Mpt[1]) != y_1:
-                 I_b = intensities[m][:]
-                 I_2 = intensities[m]
-                 I_3 = intensities[t]
-                 (y_3, y_2) = (y_1, int(Mpt[1]))
+                I_b = intensities[m][:]
+                I_2 = intensities[m]
+                I_3 = intensities[t]
+                (y_3, y_2) = (y_1, int(Mpt[1])
+                              )
+
+            elif shading_type == "phong" and int(Mpt[1]) != y_1:
+                d_N_1 = [ float(N_Tpt[0] - N_Mpt[0])/(y_1 - int(Mpt[1])), float(N_Tpt[1] - N_Mpt[1])/(y_1 - int(Mpt[1])), float(N_Tpt[2] - N_Mpt[2])/(y_1 - int(Mpt[1])) ]
+                N_b = N_Mpt[:]
 
         if shading_type == "goroud":
             if swap:
-                draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_b, I_a )
+                draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_b, I_a, shading_type )
             else:
-                draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_a, I_b )
+                draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_a, I_b, shading_type )
+        elif shading_type == "phong":
+            # print N_a
+            # print N_b
+            if swap:
+                draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, N_b, N_a, shading_type, constants, light_sources )
+            else:
+                draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, N_a, N_b, shading_type, constants, light_sources )
         else:
             draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color )
 
@@ -66,16 +97,26 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensit
         x_1 = x1_coords[i_1][0]
         z_1 = x1_coords[i_1][1]
 
-        if shading_type == "goroud" and (y_0 < y_1):
+        if shading_type == "goroud":
             for j in range(len(color)):
                 I_a[j] = int(round((float(y_0 - int(Bpt[1]))/(y_1 - int(Bpt[1]))) * I_1[j] + (float(y_1 - y_0)/(y_1 - int(Bpt[1]))) * intensities[b][j]))
                 I_b[j] = int(round((float(y_0 - y_2)/(y_3 - y_2)) * I_3[j] + (float(y_3 - y_0)/(y_3 - y_2)) * I_2[j]))
 
+        elif shading_type == "phong":
+            for j in range(len(color)):
+                N_a[j] += d_N_0[j]
+                N_b[j] += d_N_1[j]
+
     if shading_type == "goroud":
         if swap:
-            draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_b, I_1 )
+            draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_b, I_1, shading_type )
         else:
-            draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_1, I_b )
+            draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_1, I_b, shading_type )
+    elif shading_type == "phong":
+        if swap:
+            draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, N_b, N_Tpt, shading_type, constants, light_sources )
+        else:
+            draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, N_Tpt, N_b, shading_type, constants, light_sources )
     else:
         draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color )
 
@@ -89,7 +130,7 @@ def draw_polygons( matrix, screen, zbuffer, color, constants = [], light_sources
         print 'Need at least 3 points to draw'
         return
 
-    if shading_type == "goroud":
+    if shading_type == "goroud" or shading_type == "phong":
         v_n = list_vertex_normals(matrix)
 
     intensities = []
@@ -106,9 +147,14 @@ def draw_polygons( matrix, screen, zbuffer, color, constants = [], light_sources
                 intensities = [ calc_total_light(v_n[(int(matrix[point][0]), int(matrix[point][1]), matrix[point][2])], constants, light_sources),
                                 calc_total_light(v_n[(int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][2])], constants, light_sources),
                                 calc_total_light(v_n[(int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][2])], constants, light_sources) ]
-            # print color
+
+            elif shading_type == "phong":
+                intensities = [ v_n[(int(matrix[point][0]), int(matrix[point][1]), matrix[point][2])],
+                                v_n[(int(matrix[point+1][0]), int(matrix[point+1][1]), matrix[point+1][2])],
+                                v_n[(int(matrix[point+2][0]), int(matrix[point+2][1]), matrix[point+2][2])] ]
+            # print intensities
             # color = [ random.randrange(256), random.randrange(256), random.randrange(256) ]
-            scanline_convert(matrix, point, screen, zbuffer, color, shading_type, intensities )
+            scanline_convert(matrix, point, screen, zbuffer, color, shading_type, intensities, constants, light_sources )
             # draw_line( int(matrix[point][0]),
             #            int(matrix[point][1]),
             #            matrix[point][2],
@@ -418,7 +464,7 @@ def scanline_helper(x0, y0, z0, x1, y1, z1):
 
 
 
-def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color, I_a = [], I_b = [] ):
+def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color, left = [], right = [], shading_type = "", constants = [], light_sources = [] ):
 
     #swap points if going right -> left
     if x0 > x1:
@@ -479,8 +525,16 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color, I_a = [], I_b = [
 
     delta_z = float(z1 - z)/distance if distance != 0 else 0
 
-    if len(I_a) > 0 and len(I_b) > 0:
-        color = I_a[:]
+    if shading_type == "goroud":
+        color = left[:]
+
+    elif shading_type == "phong":
+        # print A
+        # print B
+        color = calc_total_light(left, constants, light_sources)
+        if distance != 0:
+            d_N = [ float(right[0] - left[0])/(distance), float(right[1] - left[1])/(distance), float(right[2] - left[2])/(distance) ]
+            N = left[:]
 
     while ( loop_start < loop_end ):
         plot( screen, zbuffer, color, x, y, z )
@@ -495,10 +549,15 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color, I_a = [], I_b = [
             y+= dy_east
             d+= d_east
 
-        if len(I_a) > 0 and len(I_b) > 0:
+        if shading_type == "goroud":
             for i in range(len(color)):
-                I = int(round((float(x - x0)/(x1 - x0)) * I_b[i] + (float(x1 - x)/(x1 - x0)) * I_a[i]))
+                I = int(round((float(x - x0)/(x1 - x0)) * right[i] + (float(x1 - x)/(x1 - x0)) * left[i]))
                 color[i] = I if I <= 255 else 255
+        elif shading_type == "phong":
+            for i in range(len(color)):
+                N[i] += d_N[i]
+            color = calc_total_light(N, constants, light_sources)
+                
 
         # print color
         z += delta_z
