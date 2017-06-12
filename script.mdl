@@ -4,7 +4,7 @@ light l1 1 1 1 110 110 110
 light l2 -1 1 1 110 110 110
 light l3 1 -1 1 110 110 110
 light l4 -1 -1 1 110 110 110
-constants white 0.25 0.5 0.25 0.25 0.5 0.25 0.25 0.5 0.25
+constants white 0.15 0.75 0.1 0.15 0.75 0.1 0.15 0.75 0.1
 constants grey 0.1 0.4 0.5 0.1 0.4 0.5 0.1 0.4 0.5
 
 frames 50
@@ -13,7 +13,8 @@ basename dabbing
 push
 move 250 250 0
 rotate y 360 rotator
-vary rotator 0 49 0 1
+vary rotator 0 12 0 0
+vary rotator 13 37 0 1
 box white -100 125 50 200 250 100
 //HEAD
 push
@@ -45,8 +46,10 @@ box white -40 0 40 40 100 80
 push
 move -20 -100 0
 rotate z 90 dabbingnator
-vary dabbingnator 0 8 0 0
-vary dabbingnator 9 40 0 1
+vary dabbingnator 0 4 0 0
+vary dabbingnator 5 12 0 1
+vary dabbingnator 37 44 1 0
+vary dabbingnator 45 49 0 0
 rotate x -20 movinator
 box white -10 0 10 20 125 20
 pop
@@ -57,7 +60,8 @@ move 100 125 0
 rotate z 132 movinator
 rotate y 100 movinator
 rotate x 20 movinator
-vary movinator 0 40 0 1
+vary movinator 0 12 0 1
+vary movinator 37 49 1 0
 box white 0 0 40 40 100 80
 //RIGHT LOWER ARM
 push
