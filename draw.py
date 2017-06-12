@@ -23,6 +23,10 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensit
     x0_coords = scanline_helper(x_0, y_0, z_0, int(Tpt[0]), y_1, Tpt[2])[::-1] if (x_0 > int(Tpt[0])) else scanline_helper(x_0, y_0, z_0, int(Tpt[0]), y_1, Tpt[2])
     x1_coords = scanline_helper(x_0, y_0, z_0, int(Mpt[0]), int(Mpt[1]), Mpt[2])[::-1] if (x_0 > int(Mpt[0])) else scanline_helper(x_0, y_0, z_0, int(Mpt[0]), int(Mpt[1]), Mpt[2])
     i_0 = i_1 = 0
+    swap = True if (int(Mpt[0]) <= int(Tpt[0])) and (int(Mpt[0]) <= int(Bpt[0])) else False
+    if int(Mpt[0]) != x_0 and int(Tpt[0]) != x_0:
+        swap = True if (int(Mpt[0]) <= int(Tpt[0])) and (int(Mpt[0]) >= int(Bpt[0])) and (float(y_1-y_0)/(int(Tpt[0])-x_0) <= float(int(Mpt[1])-y_0)/(int(Mpt[0])-x_0)) else swap
+        swap = True if (int(Bpt[0]) >= int(Tpt[0])) and (int(Mpt[0]) <= int(Bpt[0])) and (float(y_1-y_0)/(x_0-int(Tpt[0])) >= float(int(Mpt[1])-y_0)/(x_0-int(Mpt[0]))) else swap
 
     if shading_type == "goroud":
         I_1 = intensities[t]
@@ -39,6 +43,7 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensit
             z_1 = Mpt[2]
             x1_coords = scanline_helper(x_1, y_0, z_1, int(Tpt[0]), y_1, Tpt[2])[::-1] if (x_1 > int(Tpt[0])) else scanline_helper(x_1, y_0, z_1, int(Tpt[0]), y_1, Tpt[2])
             i_1 = 0
+
             if shading_type == "goroud" and int(Mpt[1]) != y_1:
                  I_b = intensities[m][:]
                  I_2 = intensities[m]
@@ -46,7 +51,7 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensit
                  (y_3, y_2) = (y_1, int(Mpt[1]))
 
         if shading_type == "goroud":
-            if int(Mpt[0]) < int(Tpt[0]):
+            if swap:
                 draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_b, I_a )
             else:
                 draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_a, I_b )
@@ -67,7 +72,7 @@ def scanline_convert(polygons, i, screen, zbuffer, color, shading_type, intensit
                 I_b[j] = int(round((float(y_0 - y_2)/(y_3 - y_2)) * I_3[j] + (float(y_3 - y_0)/(y_3 - y_2)) * I_2[j]))
 
     if shading_type == "goroud":
-        if int(Mpt[0]) < int(Tpt[0]):
+        if swap:
             draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_b, I_1 )
         else:
             draw_line( x_0, y_0, z_0, x_1, y_0, z_1, screen, zbuffer, color, I_1, I_b )

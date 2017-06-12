@@ -1,6 +1,6 @@
 import math
 
-e = 100
+e = 120
 V = [0, 0, 1]
 
 def calculate_normal(polygons, i):
@@ -125,6 +125,7 @@ def list_vertex_normals(matrix):
     point = 0
     while point < len(matrix) - 2:
         normal = calculate_normal(matrix, point)[:]
+
         if (int(matrix[point][0]), int(matrix[point][1]), matrix[point][2]) in v_n:
             v_n[(int(matrix[point][0]), int(matrix[point][1]), matrix[point][2])].append(normal)
         else:
