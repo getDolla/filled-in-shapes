@@ -1,7 +1,9 @@
 shading goroud
-
 ambient 255 255 255
-light l1 0 1 1 255 0 255
+light l1 1 1 1 110 110 110
+light l2 -1 1 1 110 110 110
+light l3 1 -1 1 110 110 110
+light l4 -1 -1 1 110 110 110
 constants white 0.25 0.5 0.25 0.25 0.5 0.25 0.25 0.5 0.25
 
 frames 100
