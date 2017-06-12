@@ -504,4 +504,4 @@ def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color, I_a = [], I_b = [
         z += delta_z
         loop_start+= 1
 
-    plot( screen, zbuffer, I_b, x1, y1, z1 )
+    plot( screen, zbuffer, color, x1, y1, z1 )
